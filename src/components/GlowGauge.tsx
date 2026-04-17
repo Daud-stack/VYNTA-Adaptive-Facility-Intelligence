@@ -5,13 +5,16 @@ import React from 'react';
 interface GlowGaugeProps {
   value: number;
   label: string;
+  min?: number;
+  max?: number;
   size?: number;
 }
 
-const GlowGauge: React.FC<GlowGaugeProps> = ({ value, label, size = 200 }) => {
+const GlowGauge: React.FC<GlowGaugeProps> = ({ value, label, min = 0, max = 100, size = 200 }) => {
   const radius = (size / 2) - 10;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (value / 100) * circumference;
+  const percentage = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div style={{

@@ -1,136 +1,142 @@
-import React from 'react';
-import GlowGauge from '@/components/GlowGauge';
-import TrendChart from '@/components/TrendChart';
+'use client';
 
-const EnergyCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
-  <div className="glass" style={{
-    padding: '1.5rem',
-    borderRadius: 'var(--radius-lg)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-  }}>
-    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h4>
-    {children}
-  </div>
-);
+import React, { useState, useEffect } from 'react';
+import { useVynta } from '@/lib/store';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell
+} from 'recharts';
+import GlowGauge from '@/components/GlowGauge';
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="glass" style={{ padding: '0.8rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+        <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '0.2rem' }}>{label}</p>
+        <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#10b981' }}>{payload[0].value} kWh</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function EnergyHub() {
+  const { sensors } = useVynta();
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/energy')
+      .then(res => res.json())
+      .then(data => {
+        setChartData(data.reverse()); // Show chronological order
+        setLoading(false);
+      });
+  }, []);
+
+  const forecastData = [
+    { name: '12:00', value: 120, type: 'actual' },
+    { name: '13:00', value: 125, type: 'actual' },
+    { name: '14:00', value: 180, type: 'forecast' },
+    { name: '15:00', value: 210, type: 'forecast' },
+    { name: '16:00', value: 195, type: 'forecast' },
+  ];
+
   return (
-    <div style={{ width: '100%' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-        <div>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: '800' }}>Vynta <span className="text-gradient">Energy Hub</span></h2>
-          <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Sustainabilty intelligence and power distribution metrics.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="glass glass-hover" style={{ padding: '0.8rem 1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', color: 'white', cursor: 'pointer' }}>Download ESG Report</button>
-          <button className="glass-hover" style={{
-            padding: '0.8rem 1.5rem',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--primary-gradient)',
-            border: 'none',
-            color: 'white',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}>
-            Optimization Settings
-          </button>
-        </div>
+    <div style={{ width: '100%', padding: '2rem' }}>
+      <header style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '2.2rem', fontWeight: '800' }}>Energy <span className="text-gradient">Intelligence</span></h2>
+        <p style={{ color: 'var(--text-dim)' }}>AI-optimized power distribution and PUE efficiency tracking.</p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-        {/* Sustainability Score */}
-        <div className="glass" style={{ 
-          padding: '2.5rem', 
-          borderRadius: 'var(--radius-lg)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, transparent 70%)'
-        }}>
-          <GlowGauge value={92} label="Eco Score" size={240} />
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <p style={{ color: '#10b981', fontWeight: '700', fontSize: '1.1rem' }}>Platinum Status</p>
-            <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginTop: '0.3rem' }}>Top 5% of enterprise facilities globally.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', marginBottom: '2rem' }}>
+        {/* Efficiency Gauge */}
+        <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '2rem', color: 'var(--text-dim)' }}>LIVE PUE RATIO</h3>
+          <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GlowGauge value={sensors.pue} min={1.0} max={2.0} label="SYSTEM PUE" />
+          </div>
+          <div style={{ marginTop: '2rem', padding: '1rem', borderRadius: 'var(--radius-md)', background: 'rgba(16, 185, 129, 0.05)' }}>
+            <p style={{ fontSize: '0.8rem', color: '#10b981' }}>✨ OPTIMAL PERFORMANCE</p>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.3rem' }}>Power Usage Effectiveness is within target range.</p>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <EnergyCard title="Power Usage Effectiveness (PUE)">
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-              <span style={{ fontSize: '2.5rem', fontWeight: '800' }}>1.24</span>
-              <span style={{ color: '#10b981', fontSize: '0.9rem' }}>↓ 0.02</span>
+        {/* Energy Consumption Trend */}
+        <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.2rem' }}>Consumption Trend (kWh)</h3>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>REAL-TIME FEED ACTIVE</span>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Ideal: 1.10 | Current sector average: 1.62</p>
-            <TrendChart data={[1.28, 1.27, 1.26, 1.25, 1.24, 1.24, 1.24]} />
-          </EnergyCard>
-
-          <EnergyCard title="Carbon Footprint (MT CO2e)">
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-              <span style={{ fontSize: '2.5rem', fontWeight: '800' }}>42.8</span>
-              <span style={{ color: 'var(--text-dim)', fontSize: '1rem' }}>MT</span>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <div style={{ flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Scope 1</div>
-                <div style={{ fontWeight: '600' }}>8.2</div>
-              </div>
-              <div style={{ flex: 1, padding: '0.5rem', background: 'rgba(16,185,129,0.05)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Scope 2</div>
-                <div style={{ fontWeight: '600', color: '#10b981' }}>34.6</div>
-              </div>
-            </div>
-          </EnergyCard>
+          </div>
+          
+          <div style={{ flex: 1, minHeight: '300px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="time" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="usage" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorUsage)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-          <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Load Profile (Real-time)</h3>
-            <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-               {/* Mock Visualization */}
-               <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', height: '150px', width: '80%' }}>
-                  {[40, 60, 45, 80, 55, 90, 70, 85, 45, 60, 75, 50, 65, 80, 40].map((h, i) => (
-                    <div key={i} style={{ 
-                      flex: 1, 
-                      height: `${h}%`, 
-                      background: i === 5 || i === 7 ? 'var(--secondary-gradient)' : 'var(--primary-gradient)',
-                      borderRadius: '4px 4px 0 0',
-                      opacity: 0.6 + (h/200),
-                      boxShadow: '0 -4px 10px rgba(16, 185, 129, 0.1)'
-                    }} />
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+        {/* AI Forecasting */}
+        <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
+          <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>Predictive Load Forecasting</h3>
+          <div style={{ height: '250px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={forecastData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {forecastData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.type === 'forecast' ? '#34d39960' : '#10b981'} stroke={entry.type === 'forecast' ? '#34d399' : 'none'} strokeDasharray={entry.type === 'forecast' ? '4 2' : '0'} />
                   ))}
-               </div>
-            </div>
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+          <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-dim)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+             <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>⚠️ AI ADVISORY:</span> Anticipated load spike at 14:00 due to external ambient temperature increase. Recommending pre-cooling cycle for Server Room B.
+          </p>
+        </div>
 
-          <div className="glass" style={{ 
-            padding: '1.5rem', 
-            borderRadius: 'var(--radius-lg)',
-            borderLeft: '4px solid #10b981'
-          }}>
-            <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', color: '#10b981' }}>
-              <span style={{ marginRight: '0.5rem' }}>♻️</span> Vynta Vision
-            </h4>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', lineHeight: '1.6' }}>
-              "Ghost Loads confirmed in North Wing B. Non-critical systems remain active outside occupancy hours. Scheduled shutdown could save **$420/month** in standby power."
-            </p>
-            <button className="glass-hover" style={{
-              marginTop: '1rem',
-              width: '100%',
-              padding: '0.7rem',
-              borderRadius: '8px',
-              border: '1px solid #10b981',
-              color: '#10b981',
-              background: 'transparent',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}>
-              Execute Automated Shutdown
-            </button>
+        {/* Quick Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid #10b981' }}>
+            <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Carbon Offset</h4>
+            <div style={{ fontSize: '1.5rem', fontWeight: '800' }}>14.2 <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>tons</span></div>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.3rem' }}>Optimized reduction vs. baseline.</p>
           </div>
+          <button className="glass-hover" style={{
+            padding: '1.5rem',
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--primary-gradient)',
+            border: 'none',
+            color: 'black',
+            fontWeight: '900',
+            cursor: 'pointer',
+            textAlign: 'left'
+          }}>
+            <div style={{ fontSize: '1.1rem' }}>DEPLOY ECO-MODE</div>
+            <p style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.2rem' }}>Adjust setpoints for 12% savings.</p>
+          </button>
+        </div>
       </div>
     </div>
   );
