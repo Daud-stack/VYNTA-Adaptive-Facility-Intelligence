@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: vynta-intelligence
+    runtime: node
+    plan: free # Can be upgraded later
+    buildCommand: npm install && npm run build
+    startCommand: npx prisma db push && npm start
+    envVars:
+      - key: DATABASE_URL
+        value: file:/data/dev.db
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: vynta-data
+      mountPath: /data
+      sizeGB: 1
