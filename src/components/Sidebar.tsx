@@ -3,20 +3,30 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useVynta } from '@/lib/store';
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { user } = useVynta();
   
   const menuItems = [
-    { name: 'Dashboard', icon: '📊', path: '/' },
-    { name: 'Service Intelligence', icon: '🎧', path: '/service-desk' },
-    { name: 'Asset Registry', icon: '🏗️', path: '/assets' },
-    { name: 'Energy Hub', icon: '⚡', path: '/energy' },
-    { name: 'Maintenance', icon: '🛠️', path: '/maintenance' },
-    { name: 'Systems Analytics', icon: '📈', path: '/analytics' },
-    { name: 'Tenant Portal', icon: '🏢', path: '/portal' },
-    { name: 'Settings', icon: '⚙️', path: '/settings' },
+    { name: 'Dashboard', icon: '📊', path: '/', roles: ['Admin'] },
+    { name: 'Service Intelligence', icon: '🎧', path: '/service-desk', roles: ['Admin'] },
+    { name: 'Asset Registry', icon: '🏗️', path: '/assets', roles: ['Admin'] },
+    { name: 'Energy Hub', icon: '⚡', path: '/energy', roles: ['Admin'] },
+    { name: 'Maintenance', icon: '🛠️', path: '/maintenance', roles: ['Admin'] },
+    { name: 'Systems Analytics', icon: '📈', path: '/analytics', roles: ['Admin'] },
+    { name: 'Tenant Portal', icon: '🏢', path: '/portal', roles: ['Admin', 'Tenant'] },
+    { name: 'Settings', icon: '⚙️', path: '/settings', roles: ['Admin', 'Tenant'] },
   ];
+
+  const filteredItems = menuItems.filter(item => 
+    !item.roles || (user && item.roles.includes(user.role))
+  );
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  };
 
   return (
     <aside className="glass" style={{
@@ -41,7 +51,7 @@ const Sidebar = () => {
       </div>
 
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        {menuItems.map((item) => {
+        {filteredItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Link key={item.name} href={item.path} style={{ textDecoration: 'none' }}>
@@ -99,11 +109,12 @@ const Sidebar = () => {
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.8rem',
-            fontWeight: 'bold'
-          }}>AD</div>
+            fontWeight: 'bold',
+            color: 'black'
+          }}>{user ? getInitials(user.name) : '??'}</div>
           <div style={{ overflow: 'hidden' }}>
-            <p style={{ fontSize: '0.85rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin User</p>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Administrator</p>
+            <p style={{ fontSize: '0.85rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Vynta User'}</p>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{user?.role || 'Access Restricted'}</p>
           </div>
         </div>
       </div>
