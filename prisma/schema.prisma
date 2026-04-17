@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  label     String   // e.g. AST-101
+  name      String
+  type      String
+  location  String
+  health    Int      @default(100)
+  status    String   @default("Active")
+  uptime    String   @default("100%")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  ticketId    String   @unique // e.g. TKT-782
+  title       String
+  user        String
+  priority    String
+  status      String
+  timestamp   String
+  aiResponse  String?
+  aiReasoning String?  // JSON stringified array
+  createdAt   DateTime @default(now())
+}
+
+model SensorLog {
+  id        String   @id @default(cuid())
+  type      String   // Occupancy, PUE, Energy
+  value     Float
+  unit      String
+  timestamp DateTime @default(now())
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("User")
+  password  String
+  createdAt DateTime @default(now())
+}
