@@ -6,11 +6,20 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding Vynta Database (Prisma 6 Stable)...');
 
-  // Purge existing data
+  await prisma.user.deleteMany({});
+  await prisma.sensorLog.deleteMany({});
   await prisma.asset.deleteMany({});
   await prisma.ticket.deleteMany({});
 
-  // Build some base data
+  // Users
+  await prisma.user.createMany({
+    data: [
+      { email: 'admin@vynta.ai', name: 'Vynta Admin', role: 'Admin', password: 'password123' },
+      { email: 'tenant@techcorp.com', name: 'Sarah Sarah', role: 'Tenant', password: 'password123' },
+    ]
+  });
+
+  // Assets
   await prisma.asset.createMany({
     data: [
       { label: 'AST-101', name: 'Main Chiller A', type: 'HVAC', location: 'Section A1', health: 94, status: 'Active', uptime: '99.9%' },
@@ -20,6 +29,7 @@ async function main() {
     ]
   });
 
+  // Tickets
   await prisma.ticket.createMany({
     data: [
       { 
@@ -42,6 +52,19 @@ async function main() {
       },
     ]
   });
+
+  // Sensor Logs (Simulated Historical Data)
+  const sensors = [];
+  for (let i = 0; i < 24; i++) {
+    const time = new Date();
+    time.setHours(time.getHours() - i);
+    sensors.push(
+      { type: 'Energy', value: 120 + Math.random() * 80, unit: 'kWh', timestamp: time },
+      { type: 'Temperature', value: 21 + Math.random() * 4, unit: '°C', timestamp: time },
+      { type: 'CO2', value: 400 + Math.random() * 200, unit: 'ppm', timestamp: time }
+    );
+  }
+  await prisma.sensorLog.createMany({ data: sensors });
 
   console.log('✅ Seeding complete.');
 }

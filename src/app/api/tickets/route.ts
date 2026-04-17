@@ -13,6 +13,26 @@ export async function GET() {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    const ticket = await prisma.ticket.create({
+      data: {
+        ticketId: data.ticketId,
+        title: data.title,
+        user: data.user,
+        priority: data.priority || 'Medium',
+        status: data.status || 'Unassigned',
+        timestamp: data.timestamp || 'Just now',
+      }
+    });
+    return NextResponse.json(ticket);
+  } catch (error) {
+    console.error('Failed to create ticket:', error);
+    return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
+  }
+}
+
 export async function PUT(request: Request) {
   try {
     const data = await request.json();

@@ -10,6 +10,8 @@ interface SensorData {
 }
 
 interface User {
+  id: string;
+  email: string;
   name: string;
   role: string;
   avatar?: string;
@@ -20,7 +22,7 @@ interface VyntaContextType {
   assets: any[];
   tickets: any[];
   user: User | null;
-  login: (name: string) => void;
+  login: (userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
   refreshData: () => Promise<void>;
@@ -68,9 +70,9 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, []);
 
-  const login = (name: string) => {
-    setUser({ name, role: 'Administrator', avatar: 'AD' });
-    localStorage.setItem('vynta_user', JSON.stringify({ name, role: 'Administrator' }));
+  const login = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('vynta_user', JSON.stringify(userData));
   };
 
   const logout = () => {
