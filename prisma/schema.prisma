@@ -7,7 +7,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  OFFLINE
 }
 
 model Asset {
@@ -17,23 +22,45 @@ model Asset {
   type      String
   location  String
   health    Int      @default(100)
-  status    String   @default("Active")
+  status    AssetStatus @default(ACTIVE)
   uptime    String   @default("100%")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("assets")
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
 }
 
 model Ticket {
   id          String   @id @default(cuid())
   ticketId    String   @unique // e.g. TKT-782
   title       String
-  user        String
-  priority    String
-  status      String
-  timestamp   String
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  priority    TicketPriority @default(MEDIUM)
+  status      TicketStatus   @default(OPEN)
+  timestamp   DateTime @default(now())
   aiResponse  String?
-  aiReasoning String?  // JSON stringified array
+  
+  /// JSON stringified array
+  aiReasoning String?
   createdAt   DateTime @default(now())
+
+  @@map("tickets")
 }
 
 model SensorLog {
@@ -42,13 +69,24 @@ model SensorLog {
   value     Float
   unit      String
   timestamp DateTime @default(now())
+
+  @@map("sensor_logs")
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
-  role      String   @default("User")
+  role      Role     @default(USER)
   password  String
   createdAt DateTime @default(now())
+
+  tickets   Ticket[]
+
+  @@map("users")
 }
