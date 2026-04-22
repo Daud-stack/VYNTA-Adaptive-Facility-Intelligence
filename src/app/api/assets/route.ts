@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    const prisma = getPrismaClient();
     const assets = await prisma.asset.findMany({
       orderBy: { label: 'asc' }
     });
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
   const data = await request.json();
 
   try {
+    const prisma = getPrismaClient();
     const asset = await prisma.asset.create({
       data: {
         label: data.label,

@@ -3,13 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import { useVynta } from '@/lib/store';
 import { readJsonResponse } from '@/lib/http';
+import type { EnergyPoint } from '@/lib/types';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
 } from 'recharts';
 import GlowGauge from '@/components/GlowGauge';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+  label?: string;
+};
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="glass" style={{ padding: '0.8rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
@@ -21,23 +28,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-type EnergyPoint = {
-  time: string;
-  usage: number;
-  pue?: number;
-};
-
 export default function EnergyHub() {
   const { sensors } = useVynta();
   const [chartData, setChartData] = useState<EnergyPoint[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/energy')
-      .then(res => readJsonResponse<any[]>(res))
+      .then(res => readJsonResponse<EnergyPoint[]>(res))
       .then(data => {
         setChartData(data.reverse()); // Show chronological order
-        setLoading(false);
       });
   }, []);
 

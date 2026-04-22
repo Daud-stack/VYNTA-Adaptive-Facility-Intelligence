@@ -3,6 +3,7 @@
 import React from 'react';
 import { useVynta } from '@/lib/store';
 import DigitalTwin from '@/components/DigitalTwin';
+import type { Asset } from '@/lib/types';
 
 export default function AssetsPage() {
   const { assets } = useVynta();
@@ -32,7 +33,7 @@ export default function AssetsPage() {
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
         gap: '2rem' 
       }}>
-        {assets.map((asset: any) => (
+        {assets.map((asset: Asset) => (
           <div key={asset.id} className="glass glass-hover" style={{ 
             borderRadius: 'var(--radius-lg)', 
             overflow: 'hidden',
@@ -41,7 +42,7 @@ export default function AssetsPage() {
           }}>
             {/* 3D Visualization Header */}
             <div style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.02)' }}>
-              <DigitalTwin id={asset.label} health={asset.health} />
+              <DigitalTwin id={asset.label ?? asset.id} health={asset.health} />
             </div>
 
             {/* Asset Details */}

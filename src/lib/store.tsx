@@ -2,27 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { readJsonResponse } from '@/lib/http';
-
-interface SensorData {
-  occupancy: number;
-  pue: number;
-  energyUsage: number;
-  activeAlerts: number;
-}
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  avatar?: string;
-}
+import type { Asset, SensorData, Ticket, User } from '@/lib/types';
 
 interface VyntaContextType {
   sensors: SensorData;
-  assets: any[];
-  tickets: any[];
+  assets: Asset[];
+  tickets: Ticket[];
   user: User | null;
+  isHydrated: boolean;
   login: (userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
@@ -33,8 +20,9 @@ const VyntaContext = createContext<VyntaContextType | undefined>(undefined);
 
 export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [assets, setAssets] = useState<any[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [sensors, setSensors] = useState<SensorData>({
     occupancy: 642,
     pue: 1.42,
@@ -49,8 +37,8 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetch('/api/tickets')
       ]);
       const [assetsData, ticketsData] = await Promise.all([
-        readJsonResponse<any[]>(assetsRes),
-        readJsonResponse<any[]>(ticketsRes)
+        readJsonResponse<Asset[]>(assetsRes),
+        readJsonResponse<Ticket[]>(ticketsRes)
       ]);
       
       setAssets(Array.isArray(assetsData) ? assetsData : []);
@@ -58,7 +46,7 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // Update alerts based on tickets
       const openAlerts = Array.isArray(ticketsData) 
-        ? ticketsData.filter((t: any) => t.priority === 'High' && t.status !== 'Completed').length 
+        ? ticketsData.filter((ticket) => ticket.priority === 'High' && ticket.status !== 'Completed').length 
         : 0;
       
       setSensors(prev => ({ ...prev, activeAlerts: openAlerts }));
@@ -68,9 +56,30 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   useEffect(() => {
-    refreshData();
-    const interval = setInterval(refreshData, 30000); // Polling every 30s
-    return () => clearInterval(interval);
+    const timeoutId = window.setTimeout(() => {
+      const savedUser = window.localStorage.getItem('vynta_user');
+
+      if (savedUser) {
+        setUser(JSON.parse(savedUser) as User);
+      }
+
+      setIsHydrated(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    const loadData = () => {
+      void refreshData();
+    };
+
+    const timeoutId = window.setTimeout(loadData, 0);
+    const interval = window.setInterval(loadData, 30000); // Polling every 30s
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(interval);
+    };
   }, []);
 
   const login = (userData: User) => {
@@ -82,20 +91,13 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setUser(null);
     localStorage.removeItem('vynta_user');
   };
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('vynta_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
   return (
     <VyntaContext.Provider value={{
       sensors,
       assets,
       tickets,
       user,
+      isHydrated,
       login,
       logout,
       isAuthenticated: !!user,

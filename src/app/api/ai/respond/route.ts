@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const { ticketId, context } = await request.json();
+  const { ticketId } = await request.json();
 
   // Simulated AI Logic
   const responses = [

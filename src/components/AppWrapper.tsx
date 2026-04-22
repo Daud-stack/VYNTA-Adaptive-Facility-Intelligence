@@ -6,17 +6,21 @@ import Sidebar from "@/components/Sidebar";
 import { VyntaProvider, useVynta } from "@/lib/store";
 
 const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useVynta();
+  const { isAuthenticated, isHydrated } = useVynta();
   const pathname = usePathname();
   const router = useRouter();
   
   const isLoginPage = pathname === '/login';
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoginPage) {
+    if (isHydrated && !isAuthenticated && !isLoginPage) {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoginPage, router]);
+  }, [isAuthenticated, isHydrated, isLoginPage, router]);
+
+  if (!isHydrated && !isLoginPage) {
+    return <div style={{ background: '#0d0d0d', height: '100vh' }} />;
+  }
 
   if (!isAuthenticated && !isLoginPage) {
     return <div style={{ background: '#0d0d0d', height: '100vh' }} />;

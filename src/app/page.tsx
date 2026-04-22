@@ -2,8 +2,18 @@
 
 import React from 'react';
 import { useVynta } from '@/lib/store';
+import type { Ticket } from '@/lib/types';
 
-const StatCard = ({ title, value, unit, trend, icon, color }: any) => (
+type StatCardProps = {
+  title: string;
+  value: string | number;
+  unit: string;
+  trend: number;
+  icon: string;
+  color: string;
+};
+
+const StatCard = ({ title, value, unit, trend, icon, color }: StatCardProps) => (
   <div className="glass glass-hover" style={{
     padding: '1.5rem',
     borderRadius: 'var(--radius-lg)',
@@ -43,8 +53,8 @@ export default function Home() {
 
   // Find the most recent high-priority AI insight
   const latestInsight = tickets
-    .filter(t => t.aiResponse && t.priority === 'High')
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    .filter((ticket: Ticket) => ticket.aiResponse && ticket.priority === 'High')
+    .sort((left: Ticket, right: Ticket) => new Date(right.createdAt ?? 0).getTime() - new Date(left.createdAt ?? 0).getTime())[0];
 
   return (
     <div style={{ width: '100%', padding: '2rem' }}>

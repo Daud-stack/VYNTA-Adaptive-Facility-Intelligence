@@ -21,21 +21,37 @@ type DemoTicket = {
   createdAt?: string;
 };
 
-const globalForDemoStore = globalThis as typeof globalThis & {
-  __vyntaDemoStore?: {
-    users: DemoUser[];
-    assets: typeof mockAssets;
-    tickets: DemoTicket[];
-    energyTelemetry: typeof mockEnergyTelemetry;
-    sensorMetrics: {
-      temperature: number;
-      co2: number;
-      energy: number;
-    };
+export type DemoTenantRequest = {
+  id: string;
+  requestId: string;
+  category: 'Space Booking' | 'Access Key' | 'Catering';
+  title: string;
+  requester: string;
+  details: string;
+  status: string;
+  timestamp: string;
+  meta?: Record<string, string>;
+  createdAt?: string;
+};
+
+type DemoStore = {
+  users: DemoUser[];
+  assets: (typeof mockAssets[number] & { label: string })[];
+  tickets: DemoTicket[];
+  tenantRequests: DemoTenantRequest[];
+  energyTelemetry: typeof mockEnergyTelemetry;
+  sensorMetrics: {
+    temperature: number;
+    co2: number;
+    energy: number;
   };
 };
 
-function createStore() {
+const globalForDemoStore = globalThis as typeof globalThis & {
+  __vyntaDemoStore?: DemoStore;
+};
+
+function createStore(): DemoStore {
   return {
     users: [
       {
@@ -74,6 +90,40 @@ function createStore() {
           ? 'I recommend checking the refrigerant levels. Consumption has spiked by 14%.'
           : undefined,
     })),
+    tenantRequests: [
+      {
+        id: 'req-booking-1',
+        requestId: 'REQ-2401',
+        category: 'Space Booking',
+        title: 'Boardroom Atlas reservation',
+        requester: 'Sarah Jenkins',
+        details: 'Need a 12-seat room with video conferencing for a client briefing.',
+        status: 'Confirmed',
+        timestamp: 'Today, 14:00',
+        meta: {
+          date: 'Today',
+          time: '14:00 - 15:30',
+          attendees: '12',
+        },
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'req-catering-1',
+        requestId: 'REQ-2402',
+        category: 'Catering',
+        title: 'Coffee and pastry drop',
+        requester: 'Sarah Jenkins',
+        details: 'Refreshments for the Level 4 morning standup.',
+        status: 'Preparing',
+        timestamp: 'Tomorrow, 08:30',
+        meta: {
+          delivery: 'Tomorrow 08:30',
+          servings: '8',
+          preference: 'Vegetarian mix',
+        },
+        createdAt: new Date().toISOString(),
+      },
+    ],
     energyTelemetry: [...mockEnergyTelemetry],
     sensorMetrics: {
       temperature: 21.4,
@@ -83,7 +133,7 @@ function createStore() {
   };
 }
 
-export function getDemoStore() {
+export function getDemoStore(): DemoStore {
   if (!globalForDemoStore.__vyntaDemoStore) {
     globalForDemoStore.__vyntaDemoStore = createStore();
   }

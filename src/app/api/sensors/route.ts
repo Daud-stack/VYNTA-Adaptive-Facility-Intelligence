@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const zone = searchParams.get('zone') || 'Building-Wide';
 
   try {
+    const prisma = getPrismaClient();
     // Fetch latest logs for each sensor type
     const [temp, co2, energy] = await Promise.all([
       prisma.sensorLog.findFirst({ where: { type: 'Temperature' }, orderBy: { timestamp: 'desc' } }),

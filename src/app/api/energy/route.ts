@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/prisma';
 import { mockEnergyTelemetry } from '@/lib/mockData';
 
 export async function GET() {
   try {
+    const prisma = getPrismaClient();
     const logs = await prisma.sensorLog.findMany({
       where: { type: 'Energy' },
       orderBy: { timestamp: 'desc' },

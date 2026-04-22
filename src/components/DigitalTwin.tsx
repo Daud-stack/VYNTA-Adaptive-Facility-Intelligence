@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import type { Mesh } from 'three';
 import { MeshDistortMaterial, MeshWobbleMaterial, Edges } from '@react-three/drei';
 import ThreeCanvas from './ThreeCanvas';
 
@@ -10,9 +11,11 @@ interface DigitalTwinProps {
   health: number;
 }
 
-const AssetModel = ({ id, health }: DigitalTwinProps) => {
-  const meshRef = useRef<any>(null);
+const AssetModel = ({ health }: Pick<DigitalTwinProps, 'health'>) => {
+  const meshRef = useRef<Mesh | null>(null);
   const healthColor = health > 90 ? '#10b981' : health > 70 ? '#f59e0b' : '#ef4444';
+  const wobbleSpeed = Math.max((100 - health) / 20, 1);
+  const wobbleFactor = Math.max((100 - health) / 100, 0.1);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -28,8 +31,8 @@ const AssetModel = ({ id, health }: DigitalTwinProps) => {
         <boxGeometry />
         <MeshWobbleMaterial 
           color={healthColor} 
-          speed={meshRef.current ? (100 - health) / 20 : 1} 
-          factor={meshRef.current ? (100 - health) / 100 : 0.1}
+          speed={wobbleSpeed} 
+          factor={wobbleFactor}
           opacity={0.3}
           transparent
         />
@@ -74,7 +77,7 @@ const DigitalTwin = ({ id, health }: DigitalTwinProps) => {
       {/* Canvas Layer */}
       <div style={{ position: 'absolute', inset: 0 }}>
         <ThreeCanvas>
-          <AssetModel id={id} health={health} />
+          <AssetModel health={health} />
         </ThreeCanvas>
       </div>
 

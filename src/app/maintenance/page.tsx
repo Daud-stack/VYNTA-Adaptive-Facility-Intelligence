@@ -1,6 +1,14 @@
 import React from 'react';
 
-const TimelineBar = ({ asset, start, width, color, status }: any) => (
+type TimelineItem = {
+  asset: string;
+  start: number;
+  width: number;
+  color: string;
+  status: string;
+};
+
+const TimelineBar = ({ asset, start, width, color, status }: TimelineItem) => (
   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
     <div style={{ width: '150px', fontSize: '0.85rem', color: 'var(--text-dim)' }}>{asset}</div>
     <div style={{ flex: 1, position: 'relative', height: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
@@ -27,7 +35,7 @@ const TimelineBar = ({ asset, start, width, color, status }: any) => (
 );
 
 export default function Maintenance() {
-  const schedule = [
+  const schedule: TimelineItem[] = [
     { asset: 'Chiller-04', start: 10, width: 20, color: '#10b981', status: 'Preventive' },
     { asset: 'Elevator-A1', start: 40, width: 15, color: '#fbbf24', status: 'Inspection' },
     { asset: 'GenSet-02', start: 5, width: 30, color: '#10b981', status: 'Overhaul' },

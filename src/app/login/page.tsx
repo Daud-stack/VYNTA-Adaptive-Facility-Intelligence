@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVynta } from '@/lib/store';
 import { readJsonResponse } from '@/lib/http';
+import type { User } from '@/lib/types';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,13 +24,13 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await readJsonResponse<any>(response);
+      const data = await readJsonResponse<User | { error?: string }>(response);
 
       if (response.ok) {
-        login(data); // Pass full user object
+        login(data as User); // Pass full user object
         router.push('/');
       } else {
-        alert(data.error || 'Authentication failed');
+        alert(('error' in data && data.error) || 'Authentication failed');
       }
     } catch (error) {
       console.error('Login error:', error);

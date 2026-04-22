@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/prisma';
+
+function toSafeUser(user: { id: string; email: string; name: string; role: string }) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  };
+}
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
 
   try {
+    const prisma = getPrismaClient();
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -14,9 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid Identity or Command Key' }, { status: 401 });
     }
 
-    // Return user data (excluding password for safety)
-    const { password: _, ...userData } = user;
-    return NextResponse.json(userData);
+    return NextResponse.json(toSafeUser(user));
   } catch (error) {
     console.error('Login error:', error);
 
@@ -28,7 +36,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid Identity or Command Key' }, { status: 401 });
     }
 
-    const { password: _, ...userData } = fallbackUser;
-    return NextResponse.json(userData);
+    return NextResponse.json(toSafeUser(fallbackUser));
   }
 }

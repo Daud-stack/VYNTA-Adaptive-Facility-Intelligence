@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { useVynta } from '@/lib/store';
+import type { Ticket } from '@/lib/types';
 
 export default function ServiceDesk() {
   const { tickets, refreshData } = useVynta();
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleUpdateStatus = async (id: string, status: string) => {
@@ -34,7 +35,7 @@ export default function ServiceDesk() {
         <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Active Tickets</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {tickets.map((ticket: any) => (
+            {tickets.map((ticket: Ticket) => (
               <div 
                 key={ticket.id} 
                 className={`glass glass-hover ${selectedTicket?.id === ticket.id ? 'active-item' : ''}`}
@@ -107,7 +108,7 @@ export default function ServiceDesk() {
                   <div style={{ marginBottom: '1.5rem' }}>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>AI Reasoning Chain:</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                      {JSON.parse(selectedTicket.aiReasoning).map((step: string, i: number) => (
+                      {(JSON.parse(selectedTicket.aiReasoning) as string[]).map((step: string, i: number) => (
                         <div key={i} style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ opacity: 0.5 }}>•</span> {step}
                         </div>
@@ -147,7 +148,7 @@ export default function ServiceDesk() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-dim)' }}>
-                <p>Select a ticket to activate Vynta Genie's advisory layer.</p>
+                <p>Select a ticket to activate Vynta Genie&apos;s advisory layer.</p>
               </div>
             )}
           </div>

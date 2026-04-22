@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    const prisma = getPrismaClient();
     const tickets = await prisma.ticket.findMany({
       orderBy: { createdAt: 'desc' }
     });
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
   const data = await request.json();
 
   try {
+    const prisma = getPrismaClient();
     const ticket = await prisma.ticket.create({
       data: {
         ticketId: data.ticketId,
@@ -51,6 +53,7 @@ export async function PUT(request: Request) {
   const data = await request.json();
 
   try {
+    const prisma = getPrismaClient();
     const { id, ...updates } = data;
     
     const ticket = await prisma.ticket.update({

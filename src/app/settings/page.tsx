@@ -2,7 +2,19 @@
 
 import React from 'react';
 
-const SettingGroup = ({ title, children }: any) => (
+type SettingGroupProps = {
+  title: string;
+  children: React.ReactNode;
+};
+
+type SettingItemProps = {
+  label: string;
+  description: string;
+  type?: 'toggle' | 'select';
+  checked?: boolean;
+};
+
+const SettingGroup = ({ title, children }: SettingGroupProps) => (
   <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
     <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: 'var(--emerald-light)' }}>{title}</h3>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -11,7 +23,7 @@ const SettingGroup = ({ title, children }: any) => (
   </div>
 );
 
-const SettingItem = ({ label, description, type = 'toggle', checked = false }: any) => (
+const SettingItem = ({ label, description, type = 'toggle', checked = false }: SettingItemProps) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <div style={{ flex: 1 }}>
       <p style={{ fontWeight: '600', fontSize: '0.95rem', marginBottom: '0.1rem' }}>{label}</p>
