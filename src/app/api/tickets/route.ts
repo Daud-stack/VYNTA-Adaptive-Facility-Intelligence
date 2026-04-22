@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getDemoStore } from '@/lib/demoStore';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -9,13 +10,14 @@ export async function GET() {
     return NextResponse.json(tickets);
   } catch (error) {
     console.error('Failed to fetch tickets:', error);
-    return NextResponse.json({ error: 'Failed to fetch tickets' }, { status: 500 });
+    return NextResponse.json(getDemoStore().tickets);
   }
 }
 
 export async function POST(request: Request) {
+  const data = await request.json();
+
   try {
-    const data = await request.json();
     const ticket = await prisma.ticket.create({
       data: {
         ticketId: data.ticketId,
@@ -29,13 +31,26 @@ export async function POST(request: Request) {
     return NextResponse.json(ticket);
   } catch (error) {
     console.error('Failed to create ticket:', error);
-    return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
+    const store = getDemoStore();
+    const ticket = {
+      id: `demo-${Date.now()}`,
+      ticketId: data.ticketId ?? `TKT-${Math.floor(1000 + Math.random() * 9000)}`,
+      title: data.title,
+      user: data.user ?? 'Anonymous Tenant',
+      priority: data.priority || 'Medium',
+      status: data.status || 'Unassigned',
+      timestamp: data.timestamp || 'Just now',
+      createdAt: new Date().toISOString(),
+    };
+    store.tickets.unshift(ticket);
+    return NextResponse.json(ticket, { status: 201 });
   }
 }
 
 export async function PUT(request: Request) {
+  const data = await request.json();
+
   try {
-    const data = await request.json();
     const { id, ...updates } = data;
     
     const ticket = await prisma.ticket.update({
@@ -46,6 +61,14 @@ export async function PUT(request: Request) {
     return NextResponse.json(ticket);
   } catch (error) {
     console.error('Failed to update ticket:', error);
-    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
+    const store = getDemoStore();
+    const ticket = store.tickets.find((item) => item.id === data.id);
+
+    if (!ticket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+
+    Object.assign(ticket, data);
+    return NextResponse.json(ticket);
   }
 }

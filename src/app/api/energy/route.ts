@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getDemoStore } from '@/lib/demoStore';
 import { prisma } from '@/lib/prisma';
 import { mockEnergyTelemetry } from '@/lib/mockData';
 
@@ -22,6 +23,6 @@ export async function GET() {
     })));
   } catch (error) {
     console.error('Failed to fetch energy logs:', error);
-    return NextResponse.json(mockEnergyTelemetry);
+    return NextResponse.json(getDemoStore().energyTelemetry.length > 0 ? getDemoStore().energyTelemetry : mockEnergyTelemetry);
   }
 }

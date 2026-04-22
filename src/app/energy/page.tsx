@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useVynta } from '@/lib/store';
+import { readJsonResponse } from '@/lib/http';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
@@ -20,14 +21,20 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+type EnergyPoint = {
+  time: string;
+  usage: number;
+  pue?: number;
+};
+
 export default function EnergyHub() {
   const { sensors } = useVynta();
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<EnergyPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/energy')
-      .then(res => res.json())
+      .then(res => readJsonResponse<any[]>(res))
       .then(data => {
         setChartData(data.reverse()); // Show chronological order
         setLoading(false);

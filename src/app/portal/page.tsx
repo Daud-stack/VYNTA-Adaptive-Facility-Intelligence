@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useVynta } from '@/lib/store';
+import { readJsonResponse } from '@/lib/http';
 
 const QuickAction = ({ icon, label, color, onClick }: any) => (
   <button 
@@ -37,7 +38,7 @@ export default function TenantPortal() {
 
   useEffect(() => {
     fetch('/api/sensors?zone=Suite-405')
-      .then(res => res.json())
+      .then(res => readJsonResponse<any>(res))
       .then(data => setMetrics(data.metrics));
   }, []);
 

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
+import { getDemoStore } from '@/lib/demoStore';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
-  try {
-    const { email, password } = await request.json();
+  const { email, password } = await request.json();
 
+  try {
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -18,6 +19,16 @@ export async function POST(request: Request) {
     return NextResponse.json(userData);
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    const fallbackUser = getDemoStore().users.find(
+      (user) => user.email === email && user.password === password
+    );
+
+    if (!fallbackUser) {
+      return NextResponse.json({ error: 'Invalid Identity or Command Key' }, { status: 401 });
+    }
+
+    const { password: _, ...userData } = fallbackUser;
+    return NextResponse.json(userData);
   }
 }

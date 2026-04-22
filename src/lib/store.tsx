@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { readJsonResponse } from '@/lib/http';
 
 interface SensorData {
   occupancy: number;
@@ -47,8 +48,10 @@ export const VyntaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetch('/api/assets'),
         fetch('/api/tickets')
       ]);
-      const assetsData = await assetsRes.json();
-      const ticketsData = await ticketsRes.json();
+      const [assetsData, ticketsData] = await Promise.all([
+        readJsonResponse<any[]>(assetsRes),
+        readJsonResponse<any[]>(ticketsRes)
+      ]);
       
       setAssets(Array.isArray(assetsData) ? assetsData : []);
       setTickets(Array.isArray(ticketsData) ? ticketsData : []);

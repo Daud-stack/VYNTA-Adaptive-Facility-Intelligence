@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getDemoStore } from '@/lib/demoStore';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -9,13 +10,14 @@ export async function GET() {
     return NextResponse.json(assets);
   } catch (error) {
     console.error('Failed to fetch assets:', error);
-    return NextResponse.json({ error: 'Failed to fetch assets' }, { status: 500 });
+    return NextResponse.json(getDemoStore().assets);
   }
 }
 
 export async function POST(request: Request) {
+  const data = await request.json();
+
   try {
-    const data = await request.json();
     const asset = await prisma.asset.create({
       data: {
         label: data.label,
@@ -30,6 +32,18 @@ export async function POST(request: Request) {
     return NextResponse.json(asset);
   } catch (error) {
     console.error('Failed to create asset:', error);
-    return NextResponse.json({ error: 'Failed to create asset' }, { status: 500 });
+    const store = getDemoStore();
+    const asset = {
+      id: data.label ?? `AST-${Date.now()}`,
+      label: data.label ?? `AST-${Date.now()}`,
+      name: data.name,
+      type: data.type,
+      location: data.location,
+      health: data.health || 100,
+      status: data.status || 'Active',
+      uptime: data.uptime || '100%',
+    };
+    store.assets.unshift(asset);
+    return NextResponse.json(asset, { status: 201 });
   }
 }

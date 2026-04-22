@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVynta } from '@/lib/store';
+import { readJsonResponse } from '@/lib/http';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse<any>(response);
 
       if (response.ok) {
         login(data); // Pass full user object
