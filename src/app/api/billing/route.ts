@@ -1,7 +1,6 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET(req: Request) {
   try {
@@ -42,3 +41,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
   }
 }
+

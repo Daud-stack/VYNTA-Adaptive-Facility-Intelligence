@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
 import { getPrismaClient } from '@/lib/prisma';
@@ -27,3 +28,4 @@ export async function GET() {
     return NextResponse.json(getDemoStore().energyTelemetry.length > 0 ? getDemoStore().energyTelemetry : mockEnergyTelemetry);
   }
 }
+

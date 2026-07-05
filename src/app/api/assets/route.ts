@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDemoStore } from '@/lib/demoStore';
 import { getPrismaClient } from '@/lib/prisma';
@@ -49,3 +50,4 @@ export async function POST(request: Request) {
     return NextResponse.json(asset, { status: 201 });
   }
 }
+
