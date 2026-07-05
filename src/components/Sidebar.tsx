@@ -16,7 +16,15 @@ const Sidebar = () => {
     { name: 'Energy Hub', icon: '⚡', path: '/energy', roles: ['Admin'] },
     { name: 'Maintenance', icon: '🛠️', path: '/maintenance', roles: ['Admin'] },
     { name: 'Systems Analytics', icon: '📈', path: '/analytics', roles: ['Admin'] },
-    { name: 'Tenant Portal', icon: '🏢', path: '/portal', roles: ['Admin', 'Tenant'] },
+    { name: 'Human Resources', icon: '👥', path: '/hr', roles: ['Admin'] },
+    { name: 'Cafeteria', icon: '🍔', path: '/cafeteria', roles: ['Admin', 'Tenant'] },
+    { name: 'Corporate Travel', icon: '✈️', path: '/travel', roles: ['Admin'] },
+    { name: 'Mailroom', icon: '📦', path: '/mailroom', roles: ['Admin'] },
+    { name: 'Time & Attendance', icon: '⏱️', path: '/staff/attendance', roles: ['Admin'] },
+    { name: 'Visitor Management', icon: '🧑‍🤝‍🧑', path: '/visitors', roles: ['Admin'] },
+    { name: 'Space Booking', icon: '🏢', path: '/booking', roles: ['Admin', 'Tenant'] },
+    { name: 'Billing', icon: '💳', path: '/billing', roles: ['Admin', 'Tenant'] },
+    { name: 'Tenant Portal', icon: '🚪', path: '/portal', roles: ['Admin', 'Tenant'] },
     { name: 'Settings', icon: '⚙️', path: '/settings', roles: ['Admin', 'Tenant'] },
   ];
 

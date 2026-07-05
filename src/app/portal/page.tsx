@@ -306,14 +306,37 @@ export default function TenantPortal() {
 
   return (
     <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%', padding: '2rem', paddingBottom: '4rem' }}>
-      <header style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem' }}>
-          Resident <span className="text-gradient">Experience</span>
-        </h1>
-        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>
-          Vynta Portal: Welcome back, {user?.name}
-        </p>
+      <header style={{ marginBottom: '2rem' }}>
+        <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Tenant Portal</h1>
+        <p style={{ color: 'var(--text-dim)' }}>Welcome back, {user?.name}. Manage your workplace experience.</p>
       </header>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+        <a href="/booking" style={{ textDecoration: 'none' }}>
+          <div className="glass glass-hover" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🏢</div>
+            <h3 style={{ margin: 0, color: 'var(--text)' }}>Book a Space</h3>
+          </div>
+        </a>
+        <a href="/visitors" style={{ textDecoration: 'none' }}>
+          <div className="glass glass-hover" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧑‍🤝‍🧑</div>
+            <h3 style={{ margin: 0, color: 'var(--text)' }}>Invite a Visitor</h3>
+          </div>
+        </a>
+        <a href="/maintenance" style={{ textDecoration: 'none' }}>
+          <div className="glass glass-hover" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🛠️</div>
+            <h3 style={{ margin: 0, color: 'var(--text)' }}>Report Issue</h3>
+          </div>
+        </a>
+        <a href="/billing" style={{ textDecoration: 'none' }}>
+          <div className="glass glass-hover" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💳</div>
+            <h3 style={{ margin: 0, color: 'var(--text)' }}>View Invoices</h3>
+          </div>
+        </a>
+      </div>
 
       <section
         className="glass"

@@ -26,6 +26,7 @@ model Asset {
   uptime    String   @default("100%")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  maintenancePolicies MaintenancePolicy[]
 
   @@map("assets")
 }
@@ -87,6 +88,268 @@ model User {
   createdAt DateTime @default(now())
 
   tickets   Ticket[]
+  visitors  Visitor[]
+  bookings  Booking[]
+  attendanceRecords AttendanceRecord[]
+  leaveRequests     LeaveRequest[]
+  invoices          Invoice[]
+  consignments      Consignment[]
+  employeeProfile   EmployeeProfile?
+  payslips          Payslip[]
+  cafeteriaOrders   CafeteriaOrder[]
+  travelRequests    TravelRequest[]
+  timesheets        Timesheet[]
 
   @@map("users")
+}
+
+enum VisitorStatus {
+  EXPECTED
+  CHECKED_IN
+  CHECKED_OUT
+  OVERSTAYED
+}
+
+model Visitor {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  company     String?
+  hostId      String
+  host        User     @relation(fields: [hostId], references: [id])
+  purpose     String
+  status      VisitorStatus @default(EXPECTED)
+  expectedAt  DateTime
+  checkedInAt DateTime?
+  checkedOutAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("visitors")
+}
+
+model Space {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // "Meeting Room", "Hot Desk", "Conference Room"
+  capacity    Int
+  amenities   String?  // JSON array string
+  status      String   @default("Available")
+  bookings    Booking[]
+  createdAt   DateTime @default(now())
+
+  @@map("spaces")
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  spaceId     String
+  space       Space    @relation(fields: [spaceId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  startTime   DateTime
+  endTime     DateTime
+  status      BookingStatus @default(CONFIRMED)
+  createdAt   DateTime @default(now())
+
+  @@map("bookings")
+}
+
+model MaintenancePolicy {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  assetId     String
+  asset       Asset    @relation(fields: [assetId], references: [id])
+  frequencyDays Int    // e.g., 90 days
+  lastRunAt   DateTime?
+  nextRunAt   DateTime
+  slaHours    Int      @default(48) // SLA for this policy
+  createdAt   DateTime @default(now())
+
+  @@map("maintenance_policies")
+}
+
+model AttendanceRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  clockIn     DateTime
+  clockOut    DateTime?
+  location    String?
+  createdAt   DateTime @default(now())
+
+  @@map("attendance_records")
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // "Sick", "Vacation", "Personal"
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      LeaveStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+
+  @@map("leave_requests")
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Float
+  description String
+  dueDate     DateTime
+  status      InvoiceStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+
+  @@map("invoices")
+}
+
+enum ConsignmentStatus {
+  RECEIVED
+  READY_FOR_PICKUP
+  DELIVERED
+}
+
+model Consignment {
+  id              String   @id @default(cuid())
+  trackingNumber  String   @unique
+  carrier         String
+  recipientId     String
+  recipient       User     @relation(fields: [recipientId], references: [id])
+  status          ConsignmentStatus @default(RECEIVED)
+  receivedAt      DateTime @default(now())
+  deliveredAt     DateTime?
+
+  @@map("consignments")
+}
+
+model EmployeeProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  department      String
+  jobTitle        String
+  hireDate        DateTime
+  salary          Float
+  bankAccount     String?
+  createdAt       DateTime @default(now())
+
+  @@map("employee_profiles")
+}
+
+model Payslip {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  periodStart     DateTime
+  periodEnd       DateTime
+  basicPay        Float
+  deductions      Float
+  netPay          Float
+  documentUrl     String?  // Could link to a PDF
+  createdAt       DateTime @default(now())
+
+  @@map("payslips")
+}
+
+model MenuItem {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  price           Float
+  calories        Int?
+  allergens       String?  // JSON array string
+  isAvailable     Boolean  @default(true)
+  orders          CafeteriaOrder[]
+
+  @@map("menu_items")
+}
+
+enum OrderStatus {
+  PLACED
+  PREPARING
+  READY
+  DELIVERED
+}
+
+model CafeteriaOrder {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  menuItemId      String
+  menuItem        MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity        Int      @default(1)
+  status          OrderStatus @default(PLACED)
+  orderedAt       DateTime @default(now())
+
+  @@map("cafeteria_orders")
+}
+
+enum TravelStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model TravelRequest {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  destination     String
+  purpose         String
+  startDate       DateTime
+  endDate         DateTime
+  estimatedCost   Float
+  status          TravelStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+
+  @@map("travel_requests")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  budget          Float?
+  status          String   @default("ACTIVE")
+  timesheets      Timesheet[]
+  createdAt       DateTime @default(now())
+
+  @@map("projects")
+}
+
+model Timesheet {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id])
+  hours           Float
+  date            DateTime
+  description     String?
+  createdAt       DateTime @default(now())
+
+  @@map("timesheets")
 }
