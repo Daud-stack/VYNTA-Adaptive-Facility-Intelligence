@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function MailroomDashboard() {
   const { user } = useVynta();
-  const [consignments, setConsignments] = useState([]);
+  const [consignments, setConsignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -92,3 +92,4 @@ export default function MailroomDashboard() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function VisitorManagement() {
   const { user } = useVynta();
-  const [visitors, setVisitors] = useState([]);
+  const [visitors, setVisitors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,3 +96,4 @@ export default function VisitorManagement() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function CafeteriaManagement() {
   const { user } = useVynta();
-  const [menuItems, setMenuItems] = useState([]);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,4 +99,5 @@ export default function CafeteriaManagement() {
     </div>
   );
 }
+
 

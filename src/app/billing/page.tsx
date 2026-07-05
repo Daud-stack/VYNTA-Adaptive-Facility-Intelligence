@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function TenantBilling() {
   const { user } = useVynta();
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -115,4 +115,5 @@ export default function TenantBilling() {
     </div>
   );
 }
+
 

@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function StaffAttendance() {
   const { user } = useVynta();
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isClockedIn, setIsClockedIn] = useState(false);
 
@@ -124,4 +124,5 @@ export default function StaffAttendance() {
     </div>
   );
 }
+
 

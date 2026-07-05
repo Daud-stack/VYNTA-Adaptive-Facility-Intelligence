@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function HRDashboard() {
   const { user } = useVynta();
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -83,3 +83,4 @@ export default function HRDashboard() {
     </div>
   );
 }
+

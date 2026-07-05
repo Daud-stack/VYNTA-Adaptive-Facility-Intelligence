@@ -5,7 +5,7 @@ import { useVynta } from '@/lib/store';
 
 export default function TravelDashboard() {
   const { user } = useVynta();
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -94,4 +94,5 @@ export default function TravelDashboard() {
     </div>
   );
 }
+
 

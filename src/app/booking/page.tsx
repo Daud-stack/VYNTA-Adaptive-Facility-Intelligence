@@ -5,8 +5,8 @@ import { useVynta } from '@/lib/store';
 
 export default function SpaceBooking() {
   const { user } = useVynta();
-  const [spaces, setSpaces] = useState([]);
-  const [bookings, setBookings] = useState([]);
+  const [spaces, setSpaces] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -147,3 +147,4 @@ export default function SpaceBooking() {
     </div>
   );
 }
+
