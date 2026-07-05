@@ -18,7 +18,7 @@ export default function TenantBilling() {
       const url = user?.role === 'Admin' ? '/api/billing' : `/api/billing?userId=${user?.id}`;
       const res = await fetch(url);
       const data = await res.json();
-      setInvoices(data);
+      if (Array.isArray(data)) { setInvoices(data); } else { setInvoices([]); console.error('API Error:', data); }
     } catch (error) {
       console.error('Failed to fetch invoices', error);
     } finally {
@@ -115,3 +115,4 @@ export default function TenantBilling() {
     </div>
   );
 }
+

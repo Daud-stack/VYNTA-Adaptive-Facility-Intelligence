@@ -16,7 +16,7 @@ export default function CafeteriaManagement() {
     try {
       const res = await fetch('/api/cafeteria');
       const data = await res.json();
-      setMenuItems(data);
+      if (Array.isArray(data)) { setMenuItems(data); } else { setMenuItems([]); console.error('API Error:', data); }
     } catch (error) {
       console.error('Failed to fetch menu', error);
     } finally {
@@ -99,3 +99,4 @@ export default function CafeteriaManagement() {
     </div>
   );
 }
+

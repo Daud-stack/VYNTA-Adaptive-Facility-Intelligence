@@ -16,7 +16,7 @@ export default function TravelDashboard() {
     try {
       const res = await fetch('/api/travel');
       const data = await res.json();
-      setRequests(data);
+      if (Array.isArray(data)) { setRequests(data); } else { setRequests([]); console.error('API Error:', data); }
     } catch (error) {
       console.error('Failed to fetch travel requests', error);
     } finally {
@@ -94,3 +94,4 @@ export default function TravelDashboard() {
     </div>
   );
 }
+

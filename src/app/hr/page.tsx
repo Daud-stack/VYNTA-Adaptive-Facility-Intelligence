@@ -7,6 +7,7 @@ export default function HRDashboard() {
   const { user } = useVynta();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     fetchEmployees();
@@ -16,9 +17,16 @@ export default function HRDashboard() {
     try {
       const res = await fetch('/api/hr');
       const data = await res.json();
-      setEmployees(data);
+      if (!res.ok || !Array.isArray(data)) {
+        setErrorMsg(data.error || 'Failed to load employee data');
+        setEmployees([]);
+      } else {
+        setEmployees(data);
+      }
     } catch (error) {
       console.error('Failed to fetch HR data', error);
+      setErrorMsg('Network error while fetching HR data');
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
@@ -50,7 +58,11 @@ export default function HRDashboard() {
             </tr>
           </thead>
           <tbody>
-            {employees.length === 0 ? (
+            {errorMsg ? (
+              <tr>
+                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--red)' }}>{errorMsg}</td>
+              </tr>
+            ) : employees.length === 0 ? (
               <tr>
                 <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-dim)' }}>No HR profiles found.</td>
               </tr>

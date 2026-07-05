@@ -17,7 +17,7 @@ export default function StaffAttendance() {
     try {
       const res = await fetch(`/api/attendance?userId=${user?.id}`);
       const data = await res.json();
-      setRecords(data);
+      if (Array.isArray(data)) { setRecords(data); } else { setRecords([]); console.error('API Error:', data); }
       
       // Determine if currently clocked in (most recent record has no clockOut)
       if (data.length > 0 && !data[0].clockOut) {
@@ -124,3 +124,4 @@ export default function StaffAttendance() {
     </div>
   );
 }
+
