@@ -18,6 +18,41 @@ export default function ServiceDesk() {
         body: JSON.stringify({ id, status })
       });
       await refreshData();
+      if (selectedTicket && selectedTicket.id === id) {
+        setSelectedTicket({ ...selectedTicket, status });
+      }
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!selectedTicket) return;
+    setIsUpdating(true);
+    try {
+      const res = await fetch('/api/ai/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId: selectedTicket.ticketId })
+      });
+      const data = await res.json();
+      
+      const payload = {
+        id: selectedTicket.id,
+        aiResponse: data.response,
+        aiReasoning: JSON.stringify(data.reasoning)
+      };
+
+      await fetch('/api/tickets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      await refreshData();
+      setSelectedTicket({ ...selectedTicket, ...payload });
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsUpdating(false);
     }
@@ -54,15 +89,15 @@ export default function ServiceDesk() {
                     padding: '0.2rem 0.5rem', 
                     borderRadius: '4px', 
                     background: 'rgba(255,255,255,0.05)',
-                    color: ticket.status === 'Completed' ? '#10b981' : 'white'
+                    color: ticket.status === 'RESOLVED' ? '#10b981' : 'white'
                   }}>
                     {ticket.status}
                   </span>
                 </div>
                 <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>{ticket.title}</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-                  <span>{ticket.user}</span>
-                  <span>{ticket.timestamp}</span>
+                  <span>{ticket.user || 'Unknown User'}</span>
+                  <span>{new Date(ticket.timestamp).toLocaleDateString()}</span>
                 </div>
               </div>
             ))}
@@ -100,7 +135,7 @@ export default function ServiceDesk() {
                 </p>
                 <div className="glass" style={{ padding: '1.2rem', borderRadius: 'var(--radius-md)', background: 'rgba(16, 185, 129, 0.1)', marginBottom: '1.5rem' }}>
                   <p style={{ lineHeight: '1.6', fontSize: '1rem' }}>
-                    {selectedTicket.aiResponse || "I am currently analyzing this ticket. Please wait for telemetry patterns to stabilize."}
+                    {selectedTicket.aiResponse || "I have not analyzed this ticket yet. Click 'Analyze Incident' below to fetch telemetry."}
                   </p>
                 </div>
 
@@ -117,10 +152,30 @@ export default function ServiceDesk() {
                   </div>
                 )}
 
+                {!selectedTicket.aiResponse && (
+                  <button 
+                    disabled={isUpdating}
+                    onClick={handleAnalyze}
+                    style={{ 
+                      width: '100%',
+                      padding: '0.8rem', 
+                      borderRadius: 'var(--radius-md)', 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: '1px solid #10b981', 
+                      color: '#10b981', 
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      marginBottom: '1rem'
+                    }}
+                  >
+                    {isUpdating ? 'ANALYZING...' : 'ANALYZE INCIDENT'}
+                  </button>
+                )}
+
                 <div style={{ display: 'flex', gap: '0.8rem' }}>
                   <button 
                     disabled={isUpdating}
-                    onClick={() => handleUpdateStatus(selectedTicket.id, 'Resolved')}
+                    onClick={() => handleUpdateStatus(selectedTicket.id, 'RESOLVED')}
                     style={{ 
                       flex: 1, 
                       padding: '0.8rem', 
@@ -134,7 +189,10 @@ export default function ServiceDesk() {
                   >
                     APPROVE SOLUTION
                   </button>
-                  <button style={{ 
+                  <button 
+                    disabled={isUpdating}
+                    onClick={() => handleUpdateStatus(selectedTicket.id, 'IN_PROGRESS')}
+                    style={{ 
                     padding: '0.8rem 1.2rem', 
                     borderRadius: 'var(--radius-md)', 
                     background: 'rgba(255,255,255,0.05)', 
