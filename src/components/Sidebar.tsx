@@ -28,9 +28,8 @@ const Sidebar = () => {
     { name: 'Settings', icon: '⚙️', path: '/settings', roles: ['Admin', 'Tenant'] },
   ];
 
-  const filteredItems = menuItems.filter(item => 
-    !item.roles || (user && item.roles.includes(user.role))
-  );
+  // Removed strict role filtering so all modules are visible for demo/exploration
+  const filteredItems = menuItems;
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
