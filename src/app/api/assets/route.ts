@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         type: data.type,
         location: data.location,
         health: data.health || 100,
-        status: data.status || 'Active',
+        status: data.status || 'ACTIVE',
         uptime: data.uptime || '100%'
       }
     });
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       type: data.type,
       location: data.location,
       health: data.health || 100,
-      status: data.status || 'Active',
+      status: data.status || 'ACTIVE',
       uptime: data.uptime || '100%',
     };
     store.assets.unshift(asset);
