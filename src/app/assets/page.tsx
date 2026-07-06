@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { useVynta } from '@/lib/store';
 import DigitalTwin from '@/components/DigitalTwin';
 import type { Asset } from '@/lib/types';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+} from 'recharts';
 
 export default function AssetsPage() {
   const { assets, refreshData } = useVynta();
@@ -15,6 +18,20 @@ export default function AssetsPage() {
     location: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTelemetryAsset, setSelectedTelemetryAsset] = useState<Asset | null>(null);
+
+  // Generate some dummy telemetry data specific to the asset
+  const getDummyTelemetry = (asset: Asset) => {
+    const data = [];
+    const baseValue = asset.type === 'HVAC' ? 120 : asset.type === 'Elevator' ? 80 : 50;
+    for (let i = 0; i < 24; i++) {
+      data.push({
+        time: `${i}:00`,
+        value: Math.max(0, baseValue + (Math.random() * 40 - 20) * (asset.status === 'Warning' ? 1.5 : 1))
+      });
+    }
+    return data;
+  };
 
   const handleAddAsset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +133,76 @@ export default function AssetsPage() {
         </div>
       )}
 
+      {/* Telemetry Modal */}
+      {selectedTelemetryAsset && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100
+        }}>
+          <div className="glass" style={{
+            padding: '2.5rem', borderRadius: 'var(--radius-lg)', width: '800px', maxWidth: '90vw',
+            border: '1px solid var(--card-border)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', color: '#10b981', fontWeight: '800' }}>Telemetry: {selectedTelemetryAsset.name}</h3>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.3rem' }}>{selectedTelemetryAsset.label} • {selectedTelemetryAsset.location}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedTelemetryAsset(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '1.5rem', cursor: 'pointer' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>CURRENT LOAD</p>
+                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'white' }}>{selectedTelemetryAsset.type === 'HVAC' ? '68%' : '42%'}</div>
+              </div>
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>HEALTH SCORE</p>
+                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: selectedTelemetryAsset.health < 80 ? '#fbbf24' : '#10b981' }}>{selectedTelemetryAsset.health}/100</div>
+              </div>
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>UPTIME</p>
+                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'white' }}>{selectedTelemetryAsset.uptime}</div>
+              </div>
+            </div>
+
+            <div style={{ height: '300px', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={getDummyTelemetry(selectedTelemetryAsset)}>
+                  <defs>
+                    <linearGradient id="telemetryGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={selectedTelemetryAsset.status === 'Warning' ? '#fbbf24' : '#10b981'} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={selectedTelemetryAsset.status === 'Warning' ? '#fbbf24' : '#10b981'} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                    itemStyle={{ color: selectedTelemetryAsset.status === 'Warning' ? '#fbbf24' : '#10b981' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke={selectedTelemetryAsset.status === 'Warning' ? '#fbbf24' : '#10b981'} 
+                    strokeWidth={3} 
+                    fillOpacity={1} 
+                    fill="url(#telemetryGradient)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
@@ -166,11 +253,13 @@ export default function AssetsPage() {
                     width: '8px', 
                     height: '8px', 
                     borderRadius: '50%', 
-                    background: asset.status === 'Active' ? '#10b981' : asset.status === 'Warning' ? '#f87171' : '#fbbf24' 
+                    background: asset.status === 'Active' || asset.status === 'ACTIVE' ? '#10b981' : asset.status === 'Warning' ? '#f87171' : '#fbbf24' 
                   }} />
                   <span style={{ fontSize: '0.85rem' }}>{asset.status}</span>
                 </div>
-                <button style={{ 
+                <button 
+                  onClick={() => setSelectedTelemetryAsset(asset)}
+                  style={{ 
                   background: 'none', 
                   border: 'none', 
                   color: 'var(--text-dim)', 
