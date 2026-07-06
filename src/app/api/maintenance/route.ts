@@ -57,3 +57,36 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    const prisma = getPrismaClient();
+    
+    // Fallback: If no asset is provided or found, create a dummy one or grab the first one to avoid foreign key failure
+    let assetId = data.assetId;
+    if (!assetId) {
+      const firstAsset = await prisma.asset.findFirst();
+      assetId = firstAsset?.id;
+    }
+
+    if (!assetId) {
+      return NextResponse.json({ error: 'No asset available to attach maintenance' }, { status: 400 });
+    }
+
+    const policy = await prisma.maintenancePolicy.create({
+      data: {
+        title: data.title || 'Scheduled Maintenance',
+        description: data.description || 'Routine check',
+        assetId: assetId,
+        frequencyDays: data.frequencyDays ? parseInt(data.frequencyDays) : 30,
+        nextRunAt: new Date(data.nextRunAt || Date.now() + 86400000)
+      }
+    });
+
+    return NextResponse.json(policy);
+  } catch (error) {
+    console.error('Failed to create maintenance task:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
