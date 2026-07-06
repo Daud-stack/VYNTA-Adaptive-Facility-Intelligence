@@ -31,6 +31,16 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 export default function EnergyHub() {
   const { sensors } = useVynta();
   const [chartData, setChartData] = useState<EnergyPoint[]>([]);
+  const [isEcoModeActive, setIsEcoModeActive] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
+
+  const handleDeployEcoMode = () => {
+    setIsDeploying(true);
+    setTimeout(() => {
+      setIsDeploying(false);
+      setIsEcoModeActive(true);
+    }, 2000);
+  };
 
   useEffect(() => {
     fetch('/api/energy')
@@ -126,21 +136,30 @@ export default function EnergyHub() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid #10b981' }}>
             <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Carbon Offset</h4>
-            <div style={{ fontSize: '1.5rem', fontWeight: '800' }}>14.2 <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>tons</span></div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '800' }}>{isEcoModeActive ? '15.8' : '14.2'} <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>tons</span></div>
             <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.3rem' }}>Optimized reduction vs. baseline.</p>
           </div>
-          <button className="glass-hover" style={{
+          <button 
+            className="glass-hover" 
+            onClick={handleDeployEcoMode}
+            disabled={isDeploying || isEcoModeActive}
+            style={{
             padding: '1.5rem',
             borderRadius: 'var(--radius-lg)',
-            background: 'var(--primary-gradient)',
-            border: 'none',
-            color: 'black',
+            background: isEcoModeActive ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary-gradient)',
+            border: isEcoModeActive ? '1px solid #10b981' : 'none',
+            color: isEcoModeActive ? '#10b981' : 'black',
             fontWeight: '900',
-            cursor: 'pointer',
-            textAlign: 'left'
+            cursor: (isDeploying || isEcoModeActive) ? 'not-allowed' : 'pointer',
+            textAlign: 'left',
+            transition: 'all 0.3s ease'
           }}>
-            <div style={{ fontSize: '1.1rem' }}>DEPLOY ECO-MODE</div>
-            <p style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.2rem' }}>Adjust setpoints for 12% savings.</p>
+            <div style={{ fontSize: '1.1rem' }}>
+              {isDeploying ? 'DEPLOYING...' : isEcoModeActive ? 'ECO-MODE ACTIVE' : 'DEPLOY ECO-MODE'}
+            </div>
+            <p style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.2rem', color: isEcoModeActive ? 'var(--text-dim)' : 'inherit' }}>
+              {isEcoModeActive ? 'Setpoints adjusted. Running at peak efficiency.' : 'Adjust setpoints for 12% savings.'}
+            </p>
           </button>
         </div>
       </div>
