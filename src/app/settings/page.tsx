@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useVynta } from '@/lib/store';
 
 type SettingGroupProps = {
   title: string;
@@ -12,6 +13,8 @@ type SettingItemProps = {
   description: string;
   type?: 'toggle' | 'select';
   checked?: boolean;
+  value?: string;
+  onChange?: (val: any) => void;
 };
 
 const SettingGroup = ({ title, children }: SettingGroupProps) => (
@@ -23,14 +26,16 @@ const SettingGroup = ({ title, children }: SettingGroupProps) => (
   </div>
 );
 
-const SettingItem = ({ label, description, type = 'toggle', checked = false }: SettingItemProps) => (
+const SettingItem = ({ label, description, type = 'toggle', checked = false, value = '', onChange }: SettingItemProps) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <div style={{ flex: 1 }}>
       <p style={{ fontWeight: '600', fontSize: '0.95rem', marginBottom: '0.1rem' }}>{label}</p>
       <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{description}</p>
     </div>
     {type === 'toggle' && (
-      <div style={{ 
+      <div 
+        onClick={() => onChange && onChange(!checked)}
+        style={{ 
         width: '44px', 
         height: '24px', 
         background: checked ? 'var(--emerald-mid)' : 'rgba(255,255,255,0.1)', 
@@ -52,7 +57,10 @@ const SettingItem = ({ label, description, type = 'toggle', checked = false }: S
       </div>
     )}
     {type === 'select' && (
-      <select style={{ 
+      <select 
+        value={value}
+        onChange={(e) => onChange && onChange(e.target.value)}
+        style={{ 
         background: 'rgba(255,255,255,0.05)', 
         border: '1px solid var(--card-border)', 
         color: 'white',
@@ -60,15 +68,58 @@ const SettingItem = ({ label, description, type = 'toggle', checked = false }: S
         borderRadius: '6px',
         fontSize: '0.85rem'
       }}>
-        <option>Standard</option>
-        <option>Aggressive</option>
-        <option>Eco-Focus</option>
+        <option value="Standard">Standard</option>
+        <option value="Aggressive">Aggressive</option>
+        <option value="Eco-Focus">Eco-Focus</option>
       </select>
     )}
   </div>
 );
 
 export default function SettingsPage() {
+  const { user } = useVynta();
+  const [settings, setSettings] = useState<Record<string, any>>({
+    autonomousHvac: true,
+    predictiveAlerts: true,
+    genieResponse: 'Standard',
+    strictCarbon: false,
+    renewablePriority: true,
+    realtimeWebhooks: true,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/settings?userId=${user.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setSettings(prev => ({ ...prev, ...data }));
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch settings', err);
+        setIsLoading(false);
+      });
+  }, [user]);
+
+  const handleUpdate = async (key: string, value: any) => {
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    
+    if (user) {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, ...newSettings })
+      });
+    }
+  };
+
+  if (!user) return <div style={{ padding: '2rem' }}>Please log in to view settings.</div>;
+  if (isLoading) return <div style={{ padding: '2rem' }}>Loading settings...</div>;
+
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%', paddingBottom: '4rem' }}>
       <header style={{ marginBottom: '2.5rem' }}>
@@ -80,17 +131,21 @@ export default function SettingsPage() {
         <SettingItem 
           label="Autonomous HVAC" 
           description="Allow Vynta to adjust building temperature based on occupancy prediction."
-          checked={true}
+          checked={settings.autonomousHvac}
+          onChange={(val) => handleUpdate('autonomousHvac', val)}
         />
         <SettingItem 
           label="Predictive Alerts" 
           description="Surface maintenance warnings before equipment failure."
-          checked={true}
+          checked={settings.predictiveAlerts}
+          onChange={(val) => handleUpdate('predictiveAlerts', val)}
         />
         <SettingItem 
           label="Genie Response Optimization" 
           description="Model behavior for automated tenant communications."
           type="select"
+          value={settings.genieResponse}
+          onChange={(val) => handleUpdate('genieResponse', val)}
         />
       </SettingGroup>
 
@@ -98,12 +153,14 @@ export default function SettingsPage() {
         <SettingItem 
           label="Strict Carbon Compliance" 
           description="Enforce energy caps during peak grid demand."
-          checked={false}
+          checked={settings.strictCarbon}
+          onChange={(val) => handleUpdate('strictCarbon', val)}
         />
         <SettingItem 
           label="Renewable Priority" 
           description="Maximize solar battery usage over grid supply."
-          checked={true}
+          checked={settings.renewablePriority}
+          onChange={(val) => handleUpdate('renewablePriority', val)}
         />
       </SettingGroup>
 
@@ -111,7 +168,8 @@ export default function SettingsPage() {
         <SettingItem 
           label="Real-time Webhooks" 
           description="Stream system events to external facility software."
-          checked={true}
+          checked={settings.realtimeWebhooks}
+          onChange={(val) => handleUpdate('realtimeWebhooks', val)}
         />
         <div style={{ 
           padding: '1rem', 

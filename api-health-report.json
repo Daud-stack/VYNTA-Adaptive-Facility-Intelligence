@@ -1,0 +1,121 @@
+[
+  {
+    "endpoint": "/attendance",
+    "status": "PASS",
+    "code": 200,
+    "duration": 2317,
+    "error": null
+  },
+  {
+    "endpoint": "/billing",
+    "status": "PASS",
+    "code": 200,
+    "duration": 481,
+    "error": null
+  },
+  {
+    "endpoint": "/bookings",
+    "status": "PASS",
+    "code": 200,
+    "duration": 1787,
+    "error": null
+  },
+  {
+    "endpoint": "/cafeteria",
+    "status": "PASS",
+    "code": 200,
+    "duration": 237,
+    "error": null
+  },
+  {
+    "endpoint": "/energy",
+    "status": "PASS",
+    "code": 200,
+    "duration": 229,
+    "error": null
+  },
+  {
+    "endpoint": "/hr",
+    "status": "PASS",
+    "code": 200,
+    "duration": 465,
+    "error": null
+  },
+  {
+    "endpoint": "/mailroom",
+    "status": "PASS",
+    "code": 200,
+    "duration": 462,
+    "error": null
+  },
+  {
+    "endpoint": "/payroll",
+    "status": "PASS",
+    "code": 200,
+    "duration": 464,
+    "error": null
+  },
+  {
+    "endpoint": "/projects",
+    "status": "PASS",
+    "code": 200,
+    "duration": 248,
+    "error": null
+  },
+  {
+    "endpoint": "/sensors",
+    "status": "PASS",
+    "code": 200,
+    "duration": 1543,
+    "error": null
+  },
+  {
+    "endpoint": "/spaces",
+    "status": "PASS",
+    "code": 200,
+    "duration": 227,
+    "error": null
+  },
+  {
+    "endpoint": "/tenant-requests",
+    "status": "PASS",
+    "code": 200,
+    "duration": 8,
+    "error": null
+  },
+  {
+    "endpoint": "/tickets",
+    "status": "PASS",
+    "code": 200,
+    "duration": 224,
+    "error": null
+  },
+  {
+    "endpoint": "/travel",
+    "status": "PASS",
+    "code": 200,
+    "duration": 451,
+    "error": null
+  },
+  {
+    "endpoint": "/visitors",
+    "status": "PASS",
+    "code": 200,
+    "duration": 445,
+    "error": null
+  },
+  {
+    "endpoint": "/assets",
+    "status": "PASS",
+    "code": 200,
+    "duration": 229,
+    "error": null
+  },
+  {
+    "endpoint": "/auth/login",
+    "status": "PASS",
+    "code": 200,
+    "duration": 553,
+    "error": null
+  }
+]

@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 
 type TimelineItem = {
   asset: string;
@@ -35,13 +37,25 @@ const TimelineBar = ({ asset, start, width, color, status }: TimelineItem) => (
 );
 
 export default function Maintenance() {
-  const schedule: TimelineItem[] = [
-    { asset: 'Chiller-04', start: 10, width: 20, color: '#10b981', status: 'Preventive' },
-    { asset: 'Elevator-A1', start: 40, width: 15, color: '#fbbf24', status: 'Inspection' },
-    { asset: 'GenSet-02', start: 5, width: 30, color: '#10b981', status: 'Overhaul' },
-    { asset: 'HVAC-01', start: 60, width: 25, color: '#f87171', status: 'Repair' },
-    { asset: 'FireSys-B', start: 20, width: 10, color: '#059669', status: 'Testing' },
-  ];
+  const [schedule, setSchedule] = useState<TimelineItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/maintenance')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSchedule(data);
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load maintenance schedule', err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <div style={{ padding: '2rem' }}>Loading live maintenance timeline...</div>;
 
   return (
     <div style={{ width: '100%' }}>

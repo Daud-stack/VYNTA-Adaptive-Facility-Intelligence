@@ -1,12 +1,28 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import TrendChart from '@/components/TrendChart';
 
 export default function Analytics() {
-  const metrics = [
-    { title: 'Operational Up-time', value: '99.98%', trend: [99.9, 99.95, 99.96, 99.98, 99.98, 99.99, 99.98], color: '#10b981' },
-    { title: 'Work Order Closure Rate', value: '92.4%', trend: [85, 88, 86, 90, 92, 91, 92], color: '#34d399' },
-    { title: 'Mean Time to Repair', value: '4.2h', trend: [5.1, 4.8, 4.5, 4.3, 4.2, 4.1, 4.2], color: '#059669' },
-  ];
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/analytics')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMetrics(data);
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load analytics', err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <div style={{ padding: '2rem' }}>Loading live analytics...</div>;
 
   return (
     <div style={{ width: '100%' }}>

@@ -198,11 +198,27 @@ export default function Home() {
             flex: 1
           }}>
             <h4 style={{ marginBottom: '1rem' }}>Smart SLA Metrics</h4>
-            {[
-              { label: 'Critical Response', value: 100, color: '#10b981' },
-              { label: 'Energy Optimization', value: 88, color: '#34d399' },
-              { label: 'Tenant Satisfaction', value: 92, color: '#059669' },
-            ].map(item => (
+            {(() => {
+              // Calculate Critical Response (High priority tickets not in OPEN state)
+              const highPriority = tickets.filter(t => t.priority === 'High');
+              const respondedHighPriority = highPriority.filter(t => t.status !== 'OPEN');
+              const criticalResponse = highPriority.length > 0 
+                ? Math.round((respondedHighPriority.length / highPriority.length) * 100)
+                : 100;
+
+              // Calculate Energy Optimization (PUE based, 1.0 is 100%, 2.0 is 0%)
+              const energyOptimization = Math.max(0, Math.min(100, Math.round(100 - ((sensors.pue - 1.0) * 100))));
+
+              // Calculate Tenant Satisfaction (Based on total open tickets)
+              const openTickets = tickets.filter(t => t.status === 'OPEN').length;
+              const satisfaction = Math.max(0, Math.min(100, Math.round(100 - (openTickets * 2))));
+
+              return [
+                { label: 'Critical Response', value: criticalResponse, color: '#10b981' },
+                { label: 'Energy Optimization', value: energyOptimization, color: '#34d399' },
+                { label: 'Tenant Satisfaction', value: satisfaction, color: '#059669' },
+              ];
+            })().map(item => (
               <div key={item.label} style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
                   <span style={{ color: 'var(--text-dim)' }}>{item.label}</span>

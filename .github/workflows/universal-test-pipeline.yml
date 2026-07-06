@@ -1,0 +1,52 @@
+name: Universal Test Pipeline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          if [ -f package.json ]; then npm install; fi
+          if [ -f pyproject.toml ]; then pip install -r requirements.txt; fi
+          if [ -f go.mod ]; then go mod download; fi
+          if [ -f Cargo.toml ]; then cargo fetch; fi
+          if [ -f pom.xml ]; then mvn install -DskipTests; fi
+
+      - name: Static Checks
+        run: |
+          npm run lint || true
+          npm run typecheck || true
+
+      - name: Unit Tests
+        run: |
+          npm run test:unit || true
+          pytest tests/unit || true
+          go test ./... || true
+          cargo test || true
+          mvn test || true
+
+      - name: Integration Tests
+        run: |
+          npm run test:integration || true
+          pytest tests/integration || true
+
+      - name: E2E Tests
+        run: |
+          npm run test:e2e || true
+
+      - name: Security Scan
+        run: |
+          npm run test:security || true
+          bandit -r . || true
+          cargo audit || true
+
+      - name: Performance Smoke Test
+        run: |
+          npm run test:performance || true

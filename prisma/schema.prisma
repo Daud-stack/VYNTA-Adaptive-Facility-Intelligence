@@ -99,6 +99,7 @@ model User {
   cafeteriaOrders   CafeteriaOrder[]
   travelRequests    TravelRequest[]
   timesheets        Timesheet[]
+  preferences       String?
 
   @@map("users")
 }
